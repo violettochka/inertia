@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using inertia.base_elems;
+using inertia.console;
 using inertia.enums;
 
 namespace inertia.models
@@ -12,8 +13,9 @@ namespace inertia.models
     {
         public Character(int x, int y) : base(x, y)
         {
-            Pixel = '$'; 
+            Pixel = '*'; 
         }
+        public int CountPrize = 0;
         public Direction Direction { get; set; }
         private Dictionary<Direction, (int, int)> _direction = new Dictionary<Direction, (int, int)>
         {
@@ -54,6 +56,14 @@ namespace inertia.models
             Clear(X, Y);
             Direction = direction;
             var newCoordinates = ChangeDirection(direction, this, field);
+            CollisionWithWall(field, newCoordinates.Item1, newCoordinates.Item2);
+            if (IsStopped)
+            {
+                Draw(X, Y);
+                return;
+            }
+            CatchTrap(field, newCoordinates.Item1, newCoordinates.Item2);
+            CatchPrize(field, newCoordinates.Item1, newCoordinates.Item2);
             RewriteEntity(field, newCoordinates.Item1, newCoordinates.Item2, this);
             Draw(X, Y);
         }
@@ -61,6 +71,39 @@ namespace inertia.models
         public override bool IsContainGameElem()
         {
             return true;
+        }
+
+        public  void CollisionWithWall(BaseClass[,] field, int x, int y)
+        {
+            if (field[x, y] is Wall || field[x, y] is Stop)
+            {
+                Direction = Direction.None;
+                return;
+            }
+        }
+
+        public bool IsStopped => Direction == Direction.None;
+
+        public void CatchPrize(BaseClass[,] field, int x, int y)
+        {
+            if (field[x, y] is Prize)
+            {
+                CountPrize++;
+            }
+            if(CountPrize == Prize.CountPrize)
+            {
+                GameConditional.IsWin = true;
+                GameConditional.IsGameContinue = false;
+            }
+        }
+
+        public void CatchTrap(BaseClass[,] field, int x, int y)
+        {
+            if (field[x, y] is Trap)
+            {
+                GameConditional.IsGameContinue = false;
+                GameConditional.EndOfTheGame(this);
+            }
         }
     }
 }

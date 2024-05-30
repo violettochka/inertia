@@ -8,7 +8,7 @@ namespace inertia.console
 {
     public class SettingsForConsole
     {
-        public const int WIDTH = 70;
-        public const int HEIGTH = 55;
+        public const int WIDTH = 45;
+        public const int HEIGTH = 45;
     }
 }
